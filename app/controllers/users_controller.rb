@@ -1,32 +1,52 @@
 class UsersController < ApplicationController
+  before_action :set_user, only:[ :show, :update, :destroy ]
 
   def index
-    @users=Usere.all
+    @users=User.all
   end
 
   def show
-    @user=User.find(params[:id])
   end
 
   def create
-    User.new(
-      name: params[:name],
-      account: params[:account],
-      email: params[:email]
-    )
+    # インスタンスをモデルから作成
+    @user = User.new( user_params )
+
+    # strong paramterを介さない場合、ActiveModel::ForbiddenAttributesError:が発生する
+    # @user = User.new( params[:user] )
+
+    # インスタンスをDBに保存
+    @user.save!
+
+    # jsonとして値を返す
+    render :show
   end
 
   def update
-    # 更新するaccountを見つける
-    @user=User.find(params[:id])
+    binding.pry
     # 更新する
-    # 保存する
+    @user.update!(user_params)
+
+    # jsonで返す
+    render :show
   end
 
-  def delete
+  def destroy
     # 削除するaccountを見つける
-    @user=User.find(params[:id])
-    # 削除する
+    @user.destroy!
+
+    render :show
   end
 
+  private
+
+    def user_params
+      params.require(:user).permit(:name, :account, :email)
+    end
+
+    def set_user
+      @user = User.find( params[:id] )
+    end
 end
+
+# To-Do リレーショナルデータベースの作成
